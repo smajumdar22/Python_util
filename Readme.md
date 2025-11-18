@@ -1,0 +1,4 @@
+-- pip install -r requirements.txt
+--pip install python-multipart
+-- pip freeze > requirements.txt
+-- uvicorn api:app --reload
