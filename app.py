@@ -23,7 +23,6 @@ from transformers import pipeline  # Used to access powerful AI models like summ
 summarizer = pipeline(
     "summarization",
     model="sshleifer/distilbart-cnn-12-6",
-    framework="pt"  # safe even without torch
 )
 
 

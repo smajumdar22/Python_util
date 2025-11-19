@@ -22,7 +22,6 @@ app = FastAPI()
 summarizer = pipeline(
     "summarization",
     model="sshleifer/distilbart-cnn-12-6",
-    framework="pt"  # safe even without torch
 )
 
 # -----------------------------------------------------------
