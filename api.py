@@ -19,7 +19,7 @@ app = FastAPI()
 # -----------------------------------------------------------
 
 # Load summarization model once at startup
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 # -----------------------------------------------------------
 # HELPER FUNCTIONS

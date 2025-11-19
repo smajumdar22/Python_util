@@ -20,7 +20,7 @@ from transformers import pipeline  # Used to access powerful AI models like summ
 
 # We use the Hugging Face "pipeline" to get a ready-made summarization model.
 # The model name "facebook/bart-large-cnn" is a well-known summarizer that can handle long text.
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 
 # =============================
