@@ -19,7 +19,11 @@ app = FastAPI()
 # -----------------------------------------------------------
 
 # Load summarization model once at startup
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+summarizer = pipeline(
+    "summarization",
+    model="sshleifer/distilbart-cnn-12-6",
+    framework="pt"  # safe even without torch
+)
 
 # -----------------------------------------------------------
 # HELPER FUNCTIONS
