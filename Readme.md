@@ -6,3 +6,10 @@ curl -X POST -H "Content-Type: application/json" \
 -d "{\"text\": \"This is a long text to summarize...\"}" \
 http://127.0.0.1:8000/summarize
 
+Rendewr build command
+pip install -r requirements.txt
+
+Render start command
+uvicorn api:app --host 0.0.0.0 --port $PORT
+
+
