@@ -13,3 +13,6 @@ Render start command
 uvicorn api:app --host 0.0.0.0 --port $PORT
 
 
+https://python-util-6.onrender.comzjq
+
+
