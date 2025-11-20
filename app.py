@@ -22,7 +22,7 @@ from transformers import pipeline  # Used to access powerful AI models like summ
 # The model name "facebook/bart-large-cnn" is a well-known summarizer that can handle long text.
 summarizer = pipeline(
     "summarization",
-    model="sshleifer/distilbart-cnn-12-6",
+    model="sshleifer/distilbart-xsum-1-1"
 )
 
 
