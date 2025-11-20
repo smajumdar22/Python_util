@@ -21,9 +21,9 @@ app = FastAPI()
 # Load summarization model once at startup
 summarizer = pipeline(
     "summarization",
-    model="sshleifer/distilbart-cnn-12-6"
-
+    model="philschmid/tiny-t5-summarization"
 )
+
 
 # -----------------------------------------------------------
 # HELPER FUNCTIONS
