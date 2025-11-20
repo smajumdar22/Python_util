@@ -21,7 +21,7 @@ app = FastAPI()
 # Load summarization model once at startup
 summarizer = pipeline(
     "summarization",
-    model="philschmid/tiny-t5-summarization"
+    model="Rahmat82/t5-small-finetuned-summarization-xsum"
 )
 
 
