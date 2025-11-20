@@ -5,8 +5,9 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import PyPDF2
-from transformers import pipeline
 import tempfile
+import requests
+import os
 
 # -----------------------------------------------------------
 # INITIALIZE FASTAPI
@@ -15,51 +16,61 @@ import tempfile
 app = FastAPI()
 
 # -----------------------------------------------------------
-# LOAD SUMMARIZATION MODEL
+# HUGGING FACE INFERENCE API
 # -----------------------------------------------------------
 
-# Load summarization model once at startup
-summarizer = pipeline(
-    "summarization",
-    model="Rahmat82/t5-small-finetuned-summarization-xsum"
-)
+HF_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
+HF_API_URL = "https://api-inference.huggingface.co/models/sshleifer/distilbart-cnn-12-6"
+HEADERS = {"Authorization": f"Bearer {HF_API_TOKEN}"}
 
+def hf_summarize(text):
+    """Send text to Hugging Face Inference API and get the summary."""
+    payload = {"inputs": text}
+    try:
+        response = requests.post(HF_API_URL, headers=HEADERS, json=payload, timeout=60)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        return f"Error calling Hugging Face API: {str(e)}"
+
+    data = response.json()
+    if isinstance(data, list) and "summary_text" in data[0]:
+        return data[0]["summary_text"]
+    return str(data)
 
 # -----------------------------------------------------------
 # HELPER FUNCTIONS
 # -----------------------------------------------------------
 
 def read_pdf_from_file(file_path):
-    """Extracts all text from a PDF file."""
+    """Extract all text from a PDF file."""
     reader = PyPDF2.PdfReader(file_path)
     text = ""
     for page in reader.pages:
         text += page.extract_text() or ""
     return text
 
+def chunk_text(text, max_length=1000, overlap=100):
+    """
+    Split text into overlapping chunks.
+    - max_length: approx number of characters per chunk
+    - overlap: number of characters overlapping between chunks
+    """
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + max_length
+        chunks.append(text[start:end])
+        start += max_length - overlap
+    return chunks
 
-def summarize_text(text):
-    """Summarizes long text by breaking it into chunks."""
-    max_chunk = 1000
-    chunks = [text[i:i + max_chunk] for i in range(0, len(text), max_chunk)]
-    summary = ""
+def summarize_long_text(text):
+    """Summarize long text in chunks via Hugging Face API."""
+    chunks = chunk_text(text, max_length=1000, overlap=100)
+    summaries = []
     for chunk in chunks:
-        result = summarizer(chunk, max_length=130, min_length=30, do_sample=False)
-        summary += result[0]["summary_text"] + " "
-    return summary.strip()
-
-
-def humanize_text(text):
-    """Makes the text more human and natural sounding."""
-    result = summarizer(text, max_length=200, min_length=50, do_sample=True)
-    return result[0]["summary_text"]
-
-
-def read_aloud(text):
-    """Text-to-speech disabled for cloud deployment."""
-    # pyttsx3 is Windows-only and won't work on Linux servers
-    # Use gTTS or other cloud TTS if needed
-    return None
+        summary = hf_summarize(chunk)
+        summaries.append(summary)
+    return " ".join(summaries)
 
 # -----------------------------------------------------------
 # API ENDPOINTS
@@ -74,16 +85,14 @@ async def read_pdf_api(file: UploadFile = File(...)):
     text = read_pdf_from_file(tmp_path)
     return JSONResponse({"text": text})
 
-
 @app.post("/summarize")
 async def summarize_api(data: dict):
     text = data.get("text", "")
     if not text:
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
-    summary = summarize_text(text)
+    summary = summarize_long_text(text)
     return JSONResponse({"summary": summary})
-
 
 @app.post("/humanize")
 async def humanize_api(data: dict):
@@ -91,5 +100,5 @@ async def humanize_api(data: dict):
     if not text:
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
-    humanized = humanize_text(text)
+    humanized = summarize_long_text(text)
     return JSONResponse({"humanized": humanized})
