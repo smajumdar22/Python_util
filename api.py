@@ -102,3 +102,8 @@ async def humanize_api(data: dict):
 
     humanized = summarize_long_text(text)
     return JSONResponse({"humanized": humanized})
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "PDF Summarizer API is running!"}
+
